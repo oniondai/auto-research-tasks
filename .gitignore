@@ -1,0 +1,33 @@
+# Tasks — append-only, NOT versioned
+# Watchdog/worker logs grow unbounded and contain machine-generated noise.
+# They live on disk locally for runtime use; only state/ is publicly versioned.
+
+tasks/*/logs/*.jsonl
+tasks/*/runs/
+tasks/*/state/findings.jsonl
+tasks/*/state/iteration_log.jsonl
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Secrets (defensive — should never be committed)
+*.pem
+*.key
+.env
+.env.local
+
+# Auto-research task internal scratch
+tasks/*/scratch/
+tasks/*/.cache/

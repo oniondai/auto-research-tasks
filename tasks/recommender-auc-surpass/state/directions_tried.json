@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "task": "recommender-auc-surpass",
+  "diversity_rule": "Each direction must differ from every tried direction in ≥ 1 structural-axis (interaction-mechanism, depth-strategy, sparsity-pattern, or input-modality). Adding more params to a tried direction counts as tactical, not a new direction.",
+  "directions": [],
+  "_backlog": [
+    {
+      "id": "D1",
+      "name": "Sparse Mixture-of-Experts Cross-Network",
+      "structural_axis": "sparsity-pattern + cross-network",
+      "hypothesis": "Cross-network depth in DCN-V2 saturates because all features participate in every cross-layer. Replacing dense cross with a top-k routed sparse expert layer (Switch-Transformer style) lets the model allocate capacity to feature interactions that matter, with implicit regularization. Should beat DCN-V2 with ≤ 1.2x params and possibly fewer at matched AUC.",
+      "evidence_targets": [
+        "Switch Transformer (Fedus et al. 2021) routing dynamics",
+        "DCN-V2 saturation analysis (Wang et al. 2020 §5.2)",
+        "CTR feature frequency distribution (long-tail)"
+      ],
+      "risks": [
+        "Routing instability on small batch sizes (CTR data is high-row, low-batch)",
+        "Expert collapse without load-balancing loss",
+        "Inference latency if not all experts fit in single batch"
+      ],
+      "estimated_complexity": "medium",
+      "novelty_claim": "First sparse-MoE applied to explicit feature interaction (as opposed to attention FFN in NLP)"
+    },
+    {
+      "id": "D2",
+      "name": "Frequency-Domain Feature Interaction (FFT-DCN)",
+      "structural_axis": "interaction-mechanism (frequency vs spatial)",
+      "hypothesis": "Feature interactions in CTR live in low-frequency components of the joint feature distribution. Computing cross terms in frequency domain (Hadamard product of FFT coefficients) is mathematically equivalent to circular convolution — captures multi-order interactions in O(d log d) instead of O(d^2), and frequency-magnitude gating provides implicit feature selection.",
+      "evidence_targets": [
+        "FNet (Lee-Thorp et al. 2021) mixing in frequency domain",
+        "SpecNet and similar spectral CNN works",
+        "Convolution theorem: cross-correlation = element-wise product in Fourier domain"
+      ],
+      "risks": [
+        "Frequency-domain interactions may not align with semantic feature meaning (high-freq components are often noise in CTR)",
+        "Loss of locality — interpretability suffers",
+        "Numerical stability of complex-valued gradients"
+      ],
+      "estimated_complexity": "high",
+      "novelty_claim": "Frequency-domain view of cross-network; spectral interpretation of feature interaction expressivity"
+    },
+    {
+      "id": "D3",
+      "name": "Neural-ODE Interest Evolution on Top of Cross Network",
+      "structural_axis": "depth-strategy (continuous-depth)",
+      "hypothesis": "Deep cross-networks hit a depth-saturation wall because they apply discrete cross layers. Treating depth as continuous via Neural ODE gives a learned-depth cross-network that adapts depth per input. On long-tail users with few interactions, ODE solver takes large steps; on heavy users, small steps for fine-grained interaction.",
+      "evidence_targets": [
+        "Neural ODE (Chen et al. 2018) for continuous-depth",
+        "Augmented Neural ODE (Dupont et al. 2019) for richer dynamics",
+        "User interest evolution theory (recsys literature)"
+      ],
+      "risks": [
+        "ODE solver overhead (adjoint method is memory-efficient but slow)",
+        "Adjoint solver numerical instability on edge CTR distributions",
+        "Difficult to deploy (latency vs discrete layers)"
+      ],
+      "estimated_complexity": "high",
+      "novelty_claim": "First Neural-ODE applied to feature interaction (vs continuous-time RNN for sequences)"
+    },
+    {
+      "id": "D4",
+      "name": "Differentiable Feature Interaction Search (DARTS-style)",
+      "structural_axis": "interaction-mechanism (architecture-search)",
+      "hypothesis": "Hand-designed cross-networks are suboptimal. Use DARTS-style differentiable architecture search to learn the interaction operator per layer from a candidate pool (Hadamard, dot-product, FFN, attention). Search converges to a small sub-graph that beats hand-designed cross on the same parameter budget.",
+      "evidence_targets": [
+        "DARTS (Liu et al. 2018) original formulation",
+        "AutoCTR (Song et al. 2020) — already does this, but uses evolutionary search",
+        "PC-DARTS, ProxylessNAS for search efficiency"
+      ],
+      "risks": [
+        "Search cost is enormous (1+ GPU-weeks on Criteo)",
+        "Searched architectures often don't transfer (dataset-specific)",
+        "AutoCTR already showed mixed results; need different search space to be novel"
+      ],
+      "estimated_complexity": "very-high",
+      "novelty_claim": "Differentiable search over feature-interaction operators (not just FFN/search space like AutoCTR)"
+    },
+    {
+      "id": "D5",
+      "name": "Calibration-Aware Cross-Network (PAC-Bayes regularized)",
+      "structural_axis": "depth-strategy + regularization",
+      "hypothesis": "Cross-networks overfit to AUC ranking objective and produce miscalibrated probabilities. Adding PAC-Bayes bound as a regularizer (not just cross-entropy) directly optimizes for calibrated LogLoss, which is what production systems actually need.",
+      "evidence_targets": [
+        "PAC-Bayes for neural nets (Dziugaite & Roy 2017)",
+        "CTR calibration literature (Badges, isotonic, temperature scaling)",
+        "DCN-V2 calibration analysis (subset of evaluation typically ignored)"
+      ],
+      "risks": [
+        "PAC-Bayes bounds are loose; may not transfer to held-out",
+        "Calibration-focused model might trade off ranking quality",
+        "Theoretical analysis may be reviewer-hostile (PAC-Bayes dense)"
+      ],
+      "estimated_complexity": "medium",
+      "novelty_claim": "First PAC-Bayes-regularized cross-network for calibrated CTR"
+    }
+  ]
+}

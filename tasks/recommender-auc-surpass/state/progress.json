@@ -1,0 +1,22 @@
+{
+  "task": "recommender-auc-surpass",
+  "created": "2026-06-21",
+  "framework": "Deli_AutoResearch v1.0",
+  "iteration": 0,
+  "total_findings": 0,
+  "stale_count": 0,
+  "status": "scaffolded",
+  "last_seen": null,
+  "last_iteration_summary": null,
+  "milestones_completed": ["M0"],
+  "next_milestone": "M1",
+  "directions_tried_count": 0,
+  "datasets_evaluated": [],
+  "baselines_compared": [],
+  "venue_target": ["RecSys", "KDD", "IEEE-TKDE", "IEEE-TNNLS"],
+  "primary_metrics": ["AUC", "LogLoss"],
+  "secondary_metrics": ["calibrated_LogLoss_ECE", "params_count", "inference_latency_ms"],
+  "best_result_so_far": null,
+  "blocking_issues": [],
+  "notes": "Scaffolded manually. Heartbeat inactive until first worker run is launched. To start: read research_backlog.md and pick iter 1 scan target."
+}

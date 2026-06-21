@@ -1,0 +1,14 @@
+[Unit]
+Description=L0 Heartbeat Guard for recommender-auc-surpass
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/victor/tasks/recommender-auc-surpass
+Environment="TASK_ROOT=/home/victor/tasks/recommender-auc-surpass"
+ExecStart=/usr/bin/python3 /home/victor/tasks/recommender-auc-surpass/refs/watchdog/l0_resident_guard.py
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=default.target
